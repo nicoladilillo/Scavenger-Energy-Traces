@@ -13,7 +13,7 @@ For its usage two main files are needed.
 - A file .csv containing all the values of timestamp and the correlate quantity, a possible header could be present.
 - One or more file containing a representation of the current/voltage curves, obtaining by digitalization. One single file is used for each curve and its format is *<product_name>_<curve_value>.txt*. Inside it there are a variable number of rows, representing point, each of which is composed by two columns, one for current and one for voltage.
 
-More curve files means also a more precise result.
+More curve files means also a more precise result and no matter in which order they are loaded.
 
 To use the tool the following command is needed.
 ```

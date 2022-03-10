@@ -1,6 +1,13 @@
+from itertools import zip_longest
 import sys
 import bisect
-import re
+
+max_Tho   = 200
+min_delta = 20
+
+# start dictionary with all possible deltaT, then disharged the empty one
+I_dictionary = {k: [] for k in range(min_delta, max_Tho, 5)}
+V_dictionary = {k: [] for k in range(min_delta, max_Tho, 5)}
 
 # pass all value of Tco of digilatize curve and elaborate it
 for Toc in sys.argv[1:]:
@@ -21,36 +28,43 @@ for Toc in sys.argv[1:]:
             app = row.split(', ')
             Tho_V_Toc.append(float(app[0]))
             V_Toc.append(float(app[1]))
+    
 
-    # write Tco of I vs deltaT
-    with open("TEG_I_vs_deltaT_Tco"+Toc+".txt",'w') as fw:
-        fw.write("deltaT, I\n")
-        # start from first value of Tho when I is not zero
-        for Tho in range(int(Toc) + 20, 200, 5):
-            # find the interval of Tho
-            i = bisect.bisect_left(Tho_I_Toc, Tho)
-            # linear interpolation
-            if i == len(I_Toc):
-                I_app = I_Toc[i-1]
-            else:
-                I_app = (I_Toc[i]-I_Toc[i-1])/(Tho_I_Toc[i]-Tho_I_Toc[i-1])*(Tho - Tho_I_Toc[i-1]) + I_Toc[i-1]
-            
-            # write new result file        
-            fw.write(str(str(Tho-int(Toc)) +  ", " + str(round(I_app, 3)) + "\n"))
+    Toc = int(Toc)
 
-    # write Tco of V vs deltaT
-    with open("TEG_V_vs_deltaT_Tco"+Toc+".txt",'w') as fw:
-        fw.write("deltaT, V\n")
-        # start from first value of Tho when V is not zero
-        for Tho in range(int(Toc) + 20, 200, 5):
-            # find the interval of Tho
-            i = bisect.bisect_left(Tho_V_Toc, Tho)
-            # linear interpolation
-            if i == len(V_Toc):
-                V_app = V_Toc[i-1]
-            else:
-                V_app = (V_Toc[i]-V_Toc[i-1])/(Tho_V_Toc[i]-Tho_V_Toc[i-1])*(Tho - Tho_V_Toc[i-1]) + V_Toc[i-1]
-            
-            # write new result file
-            fw.write(str(str(Tho-int(Toc)) +  ", " + str(round(V_app, 3)) + "\n"))
+    # elaborate I vs deltaT
+    # start from first value of Tho when I is not zero
+    for Tho in range(Toc + min_delta, max_Tho, 5):
+        # find the interval of Tho
+        i = bisect.bisect_left(Tho_I_Toc, Tho)
+        # linear interpolation
+        if i == len(I_Toc):
+            I_app = I_Toc[i-1]
+        else:
+            I_app = (I_Toc[i]-I_Toc[i-1])/(Tho_I_Toc[i]-Tho_I_Toc[i-1])*(Tho - Tho_I_Toc[i-1]) + I_Toc[i-1]
+        
+        # save value to corresponding delta       
+        I_dictionary[Tho-Toc].append(round(I_app, 3))
 
+    # elaborate V vs deltaT
+    # start from first value of Tho when V is not zero
+    for Tho in range(Toc + min_delta, max_Tho, 5):
+        # find the interval of Tho
+        i = bisect.bisect_left(Tho_V_Toc, Tho)
+        # linear interpolation
+        if i == len(V_Toc):
+            V_app = V_Toc[i-1]
+        else:
+            V_app = (V_Toc[i]-V_Toc[i-1])/(Tho_V_Toc[i]-Tho_V_Toc[i-1])*(Tho - Tho_V_Toc[i-1]) + V_Toc[i-1]
+        
+        # save value to corresponding delta
+        V_dictionary[Tho-Toc].append(round(V_app, 3))
+
+# create file for dela quantity (I, V)
+for deltaT in I_dictionary.keys():
+    if len(I_dictionary[deltaT]) > 0:
+        zip_object = zip(I_dictionary[deltaT], V_dictionary[deltaT])
+        with open("TEG_"+str(deltaT)+".txt",'w') as I_V_curve:
+            I_V_curve.write("A, V\n")
+            for I, V in zip_object:
+                I_V_curve.write(str(I) + ", " + str(V) + "\n")

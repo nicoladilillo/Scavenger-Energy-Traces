@@ -1,11 +1,11 @@
-from itertools import zip_longest
 import sys
 import bisect
 
+# parameters
 max_Tho   = 200
 min_delta = 20
 
-# start dictionary with all possible deltaT, then disharged the empty one
+# start dictionary with all possible deltaT, then discharged the empty one
 I_dictionary = {k: [] for k in range(min_delta, max_Tho, 5)}
 V_dictionary = {k: [] for k in range(min_delta, max_Tho, 5)}
 
